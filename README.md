@@ -73,16 +73,3 @@ Protótipos iniciais das páginas do sistema foram elaborados para representar a
 
 O frontend será desenvolvido utilizando React e Material UI, buscando uma interface moderna inspirada em plataformas de streaming.
 
----
-
-# 5. Referências
-
-REACT. React Documentation. Disponível em: <https://react.dev/>. Acesso em: 16 maio 2026.
-
-NODE.JS. Node.js Documentation. Disponível em: <https://nodejs.org/>. Acesso em: 16 maio 2026.
-
-POSTGRESQL. PostgreSQL Documentation. Disponível em: <https://www.postgresql.org/docs/>. Acesso em: 16 maio 2026.
-
-MATERIAL UI. Material UI Documentation. Disponível em: <https://mui.com/>. Acesso em: 16 maio 2026.
-
-TMDB. The Movie Database API. Disponível em: <https://www.themoviedb.org/>. Acesso em: 16 maio 2026.
