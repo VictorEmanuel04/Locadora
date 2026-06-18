@@ -73,3 +73,24 @@ Protótipos iniciais das páginas do sistema foram elaborados para representar a
 
 O frontend será desenvolvido utilizando React e Material UI, buscando uma interface moderna inspirada em plataformas de streaming.
 
+Página de Perfil:
+<img width="1912" height="906" alt="image" src="https://github.com/user-attachments/assets/0776b56e-11a6-49f6-9aa0-45bea8ad5102" />
+
+Página Principal:
+<img width="1912" height="906" alt="image" src="https://github.com/user-attachments/assets/8dcac390-905e-49fc-88b8-e6235cd40573" />
+
+Página de detalhes de filme:
+<img width="1912" height="906" alt="image" src="https://github.com/user-attachments/assets/28592dc9-d782-4e8d-a36e-f8b48ef27bee" />
+
+Catálogo:
+<img width="1912" height="906" alt="image" src="https://github.com/user-attachments/assets/02d7d4ea-fefa-4e27-bac0-fc034d9b92b2" />
+
+Área de administração:
+<img width="1912" height="906" alt="image" src="https://github.com/user-attachments/assets/c3a4e23b-9af8-49a9-93ac-67bb3ddf19b4" />
+
+
+Link prototipagem: https://ai.studio/apps/d9750227-b4bc-4eaf-bac0-b930de8402e1
+
+
+
+
