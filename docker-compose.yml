@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: cineloc-db
+    restart: always
+    environment:
+      POSTGRES_USER: adminloc
+      POSTGRES_PASSWORD: 4dm1n
+      POSTGRES_DB: cineloc
+    ports:
+      - "5432:5432"
+    volumes:
+      - cineloc_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  cineloc_postgres_data:
