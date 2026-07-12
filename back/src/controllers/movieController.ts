@@ -1,56 +1,36 @@
 import type { Request, Response } from "express";
-import { MovieAvailability, Prisma } from "@prisma/client";
-import { prisma } from "../lib/prisma.js";
+import { fetchMovies, fetchMovieById } from "../services/movieService.js";
+import type { MovieFilters } from "../services/movieService.js";
 
 export async function listMovies(request: Request, response: Response) {
-  const { search, genre, available } = request.query;
+  try {
+    // Extraímos os parâmetros e tipamos de acordo com a interface do Service
+    const filters: MovieFilters = {
+      search: request.query.search as string,
+      genre: request.query.genre as string,
+      available: request.query.available as string,
+    };
 
-  const where: Prisma.MovieWhereInput = {
-    ...(genre ? { genre: String(genre) } : {}),
-    ...(available === "true" ? { availability: MovieAvailability.AVAILABLE, stock: { gt: 0 } } : {}),
-    ...(search
-      ? {
-          OR: [
-            { title: { contains: String(search), mode: "insensitive" } },
-            { synopsis: { contains: String(search), mode: "insensitive" } }
-          ]
-        }
-      : {})
-  };
-
-  const movies = await prisma.movie.findMany({
-    where,
-    orderBy: { title: "asc" },
-    include: {
-      _count: {
-        select: { reviews: true, rentals: true }
-      }
-    }
-  });
-
-  return response.json({ data: movies });
+    const movies = await fetchMovies(filters);
+    return response.json({ data: movies });
+  } catch (error) {
+    return response.status(500).json({ error: "Erro interno ao buscar a lista de filmes." });
+  }
 }
 
 export async function getMovieById(request: Request, response: Response) {
   const movieId = String(request.params.id);
 
-  const movie = await prisma.movie.findUnique({
-    where: { id: movieId },
-    include: {
-      reviews: {
-        include: {
-          user: {
-            select: { id: true, name: true }
-          }
-        },
-        orderBy: { createdAt: "desc" }
-      }
+  try {
+    const movie = await fetchMovieById(movieId);
+
+    // Como o Service retorna null se não achar, o Controller decide enviar o 404
+    if (!movie) {
+      return response.status(404).json({ error: "Filme nao encontrado." });
     }
-  });
 
-  if (!movie) {
-    return response.status(404).json({ error: "Filme nao encontrado." });
+    return response.json({ data: movie });
+  } catch (error) {
+    return response.status(500).json({ error: "Erro interno ao buscar detalhes do filme." });
   }
-
-  return response.json({ data: movie });
 }
