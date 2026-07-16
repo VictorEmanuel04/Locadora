@@ -41,25 +41,26 @@ model User {
 }
 
 model Movie {
-  id             String             @id @default(uuid())
-  title          String
-  synopsis       String
-  genre          String
-  director       String?
-  releaseYear    Int?               @map("release_year")
-  durationMinutes Int?              @map("duration_minutes")
-  ageRating      String?            @map("age_rating")
-  posterUrl      String?            @map("poster_url")
-  trailerUrl     String?            @map("trailer_url")
-  rentalPrice    Decimal            @db.Decimal(10, 2) @map("rental_price")
-  availability   MovieAvailability  @default(AVAILABLE)
-  stock          Int                @default(1)
-  rentals        Rental[]
-  reviews        Review[]
-  cartItems      CartItem[]
-  wishlistItems  WishlistItem[]
-  createdAt      DateTime           @default(now()) @map("created_at")
-  updatedAt      DateTime           @updatedAt @map("updated_at")
+  id                 String            @id @default(uuid())
+  title              String
+  synopsis           String
+  genre              String
+  director           String?
+  releaseYear        Int?              @map("release_year")
+  durationMinutes    Int?              @map("duration_minutes")
+  ageRating          String?           @map("age_rating")
+  posterUrl          String?           @map("poster_url")
+  trailerUrl         String?           @map("trailer_url")
+  rentalPrice        Decimal           @db.Decimal(10, 2) @map("rental_price")
+  discountPercentage Int               @default(0) @map("discount_percentage") // Adicionado para gerenciar promoções
+  availability       MovieAvailability @default(AVAILABLE)
+  stock              Int               @default(1)
+  rentals            Rental[]
+  reviews            Review[]
+  cartItems          CartItem[]
+  wishlistItems      WishlistItem[]
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
 
   @@index([genre])
   @@index([availability])
@@ -67,20 +68,20 @@ model Movie {
 }
 
 model Rental {
-  id        String       @id @default(uuid())
-  userId    String       @map("user_id")
-  movieId   String       @map("movie_id")
-  startsAt  DateTime     @default(now()) @map("starts_at")
-  expiresAt DateTime     @map("expires_at")
-  status    RentalStatus @default(ACTIVE)
-  pricePaid Decimal      @db.Decimal(10, 2) @map("price_paid")
-  renewedFromId String?  @map("renewed_from_id")
-  renewedFrom   Rental?  @relation("RentalRenewal", fields: [renewedFromId], references: [id])
-  renewals      Rental[] @relation("RentalRenewal")
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  movie     Movie        @relation(fields: [movieId], references: [id], onDelete: Restrict)
-  createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @updatedAt @map("updated_at")
+  id            String       @id @default(uuid())
+  userId        String       @map("user_id")
+  movieId       String       @map("movie_id")
+  startsAt      DateTime     @default(now()) @map("starts_at")
+  expiresAt     DateTime     @map("expires_at")
+  status        RentalStatus @default(ACTIVE)
+  pricePaid     Decimal      @db.Decimal(10, 2) @map("price_paid")
+  renewedFromId String?      @map("renewed_from_id")
+  renewedFrom   Rental?      @relation("RentalRenewal", fields: [renewedFromId], references: [id])
+  renewals      Rental[]     @relation("RentalRenewal")
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie         Movie        @relation(fields: [movieId], references: [id], onDelete: Restrict)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
 
   @@index([userId, status])
   @@index([movieId])

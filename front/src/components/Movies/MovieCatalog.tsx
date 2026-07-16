@@ -3,7 +3,7 @@ import { ThemeProvider as MuiThemeProvider, CssBaseline, Typography, Box } from 
 import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
 
-import { muiTheme } from '../Admin/Admin.styles'; // Reutilizando o tema global
+import { muiTheme } from '../Admin/Admin.styles'; 
 import { 
   CatalogContainer, 
   TopBar, 
@@ -17,13 +17,16 @@ import {
   themeConfig
 } from './MovieCatalog.styles';
 
+// Importe a instância do Axios configurada (ajuste o caminho conforme sua estrutura de pastas)
+import { api } from '../../services/api';
+
 interface Movie {
   id: string;
   title: string;
   description: string;
   year: number;
   rating: number;
-  imageUrl?: string; // Assumindo que você terá uma imagem depois
+  imageUrl?: string; 
 }
 
 export default function MovieCatalog() {
@@ -31,23 +34,27 @@ export default function MovieCatalog() {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Função que chama o Controller: listMovies
+  // Função que chama o Controller: listMovies usando Axios
   const fetchMoviesCatalog = useCallback(async (searchQuery: string = '') => {
     setLoading(true);
     try {
-      // Monta a URL passando o search por query param, caso exista
+      // Como o Axios já tem o baseURL definido com '/api', usamos apenas a rota específica
       const url = searchQuery 
-        ? `/api/movies?search=${encodeURIComponent(searchQuery)}`
-        : '/api/movies';
+        ? `/movies?search=${encodeURIComponent(searchQuery)}`
+        : '/movies';
 
-      const response = await fetch(url);
-      const result = await response.json();
+      const response = await api.get(url);
       
-      if (response.ok) {
-        setMovies(result.data);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar filmes:", error);
+      // O Axios coloca a resposta do servidor na propriedade '.data'
+      // Como o seu controller retorna { data: movies }, acessamos '.data.data'
+      setMovies(response.data.data);
+      
+    } catch (error: any) {
+      // Tratamento de erro específico do Axios
+      console.error(
+        "Erro ao buscar filmes:", 
+        error.response?.data?.error || error.message
+      );
     } finally {
       setLoading(false);
     }
@@ -58,20 +65,23 @@ export default function MovieCatalog() {
     fetchMoviesCatalog();
   }, [fetchMoviesCatalog]);
 
-  // Implementação de um "debounce" simples: busca após o usuário parar de digitar
+  // Implementação de um "debounce" simples
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       fetchMoviesCatalog(searchTerm);
-    }, 500); // Aguarda 500ms
+    }, 500); 
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, fetchMoviesCatalog]);
 
-  // Chamaria o Controller: getMovieById (Exemplo: abrir modal ou ir para outra página)
+  // Chamaria o Controller: getMovieById 
   const handleMovieClick = async (id: string) => {
     console.log(`Buscando detalhes do filme ${id}...`);
-    // Aqui você faria um fetch(`/api/movies/${id}`)
-    // e abriria um modal com as informações detalhadas!
+    // Exemplo com Axios:
+    // try {
+    //   const response = await api.get(`/movies/${id}`);
+    //   console.log(response.data.data);
+    // } catch (error) { ... }
   };
 
   return (
@@ -105,7 +115,6 @@ export default function MovieCatalog() {
                 elevation={0}
                 onClick={() => handleMovieClick(movie.id)}
               >
-                {/* Se não tiver imagem, exibe um fundo genérico configurado no estilo */}
                 <MovieCover imageUrl={movie.imageUrl} />
                 
                 <MovieInfo>

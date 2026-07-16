@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   ThemeProvider as MuiThemeProvider, 
   CssBaseline, 
@@ -7,10 +8,7 @@ import {
   Alert
 } from '@mui/material';
 
-// Importando o tema do Material UI que criamos anteriormente
-// (Assumindo que você o exportou de um arquivo de configuração ou do AdminMovies.styles)
 import { muiTheme } from '../Admin/Admin.styles'; 
-
 import { 
   AuthContainer, 
   AuthCard, 
@@ -20,15 +18,23 @@ import {
   ToggleText 
 } from './Auth.styles';
 
+// Importando a instância do Axios e o Contexto de Autenticação
+import { api } from '../../services/api';
+import { AuthContext } from '../../context/AuthContext';
+
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Hooks de roteamento e contexto global
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError(null); // Limpa o erro ao digitar
+    setError(null); 
   };
 
   const toggleMode = () => {
@@ -37,40 +43,34 @@ export default function Auth() {
     setFormData({ name: '', email: '', password: '' });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     
-    // Define a rota com base no modo (Login ou Register)
-    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+    // Define a rota com base no modo (Axios já embute o '/api' no baseURL)
+    const endpoint = isLogin ? '/auth/login' : '/auth/register';
+    const payload = isLogin 
+      ? { email: formData.email, password: formData.password } 
+      : formData;
     
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-          isLogin 
-            ? { email: formData.email, password: formData.password } 
-            : formData
-        ),
-      });
+      // Fazendo a requisição com Axios
+      const response = await api.post(endpoint, payload);
 
-      const result = await response.json();
+      // O Axios entrega o JSON da resposta dentro de .data
+      // O seu controller retorna algo como: { data: { id, name, ... }, token: "..." }
+      const { token, data: userData } = response.data;
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Ocorreu um erro inesperado.');
-      }
-
-      // Sucesso! Salva o token JWT no localStorage
-      localStorage.setItem('@Cinerent:token', result.token);
+      // Usa a função do contexto para salvar o token e o usuário logado
+      login(token, userData);
       
-      // Aqui você pode redirecionar o usuário para a Home ou para o Painel Admin
-      console.log('Autenticado com sucesso!', result.data);
-      // window.location.href = '/admin'; 
+      // Redireciona o usuário para a página principal (Catálogo)
+      navigate('/');
 
     } catch (err: any) {
-      setError(err.message);
+      // Captura a mensagem de erro que vem do seu backend (ex: "Credenciais inválidas")
+      setError(err.response?.data?.error || 'Ocorreu um erro inesperado.');
     } finally {
       setLoading(false);
     }

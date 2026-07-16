@@ -11,7 +11,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
-// Importando os estilos e o tema do nosso novo arquivo
+// Importando os estilos e o tema do arquivo .styles
 import { 
   muiTheme, 
   AdminContainer, 
@@ -20,6 +20,9 @@ import {
   MovieListContainer, 
   MovieItem 
 } from './Admin.styles';
+
+// Importando a instância do Axios (Ajuste o caminho conforme sua estrutura)
+import { api } from '../../services/api';
 
 // --- TIPAGENS ---
 interface Movie {
@@ -36,10 +39,14 @@ export default function AdminMovies() {
   const [formData, setFormData] = useState<Partial<Movie>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  // Busca os filmes com Axios
   const fetchMovies = async () => {
-    // const response = await fetch('/api/movies');
-    // const data = await response.json();
-    // setMovies(data);
+    try {
+      const response = await api.get('/movies');
+      setMovies(response.data.data);
+    } catch (error: any) {
+      console.error("Erro ao carregar filmes:", error.response?.data?.error || error.message);
+    }
   };
 
   useEffect(() => {
@@ -50,31 +57,47 @@ export default function AdminMovies() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
+
+    // Converte ano e nota para Number para evitar erros de tipagem no Prisma (backend)
+    const payload = {
+      ...formData,
+      year: formData.year ? Number(formData.year) : undefined,
+      rating: formData.rating ? Number(formData.rating) : undefined,
+    };
     
-    if (editingId) {
-      await fetch(`/api/movies/${editingId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-    } else {
-      await fetch(`/api/movies`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+    try {
+      if (editingId) {
+        // Rota de PUT (Update)
+        await api.put(`/movies/${editingId}`, payload);
+      } else {
+        // Rota de POST (Create)
+        await api.post('/movies', payload);
+      }
+      
+      // Limpa os campos e recarrega a lista
+      setFormData({});
+      setEditingId(null);
+      fetchMovies();
+    } catch (error: any) {
+      console.error("Erro ao salvar:", error);
+      alert(error.response?.data?.error || "Erro ao salvar o filme.");
     }
-    
-    setFormData({});
-    setEditingId(null);
-    fetchMovies();
   };
 
   const handleDelete = async (id: string) => {
-    await fetch(`/api/movies/${id}`, { method: 'DELETE' });
-    fetchMovies();
+    // Confirmação simples para evitar exclusão acidental
+    if (!window.confirm("Tem certeza que deseja excluir este filme?")) return;
+
+    try {
+      // Rota de DELETE
+      await api.delete(`/movies/${id}`);
+      fetchMovies(); // Recarrega a lista
+    } catch (error: any) {
+      console.error("Erro ao excluir:", error);
+      alert(error.response?.data?.error || "Erro ao excluir o filme.");
+    }
   };
 
   const handleEdit = (movie: Movie) => {
@@ -169,20 +192,27 @@ export default function AdminMovies() {
             Catálogo Existente
           </Typography>
           
-          <MovieItem elevation={0}>
-            <div>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>Estelar: Além do Horizonte</Typography>
-              <Typography variant="body2" color="textSecondary">Ano: 2024 • Nota: 4.5</Typography>
-            </div>
-            <div>
-              <IconButton color="primary" onClick={() => console.log('Editar')}>
-                <EditIcon />
-              </IconButton>
-              <IconButton color="error" onClick={() => console.log('Deletar')}>
-                <DeleteIcon />
-              </IconButton>
-            </div>
-          </MovieItem>
+          {/* Mapeamento dinâmico dos filmes do backend */}
+          {movies.length === 0 ? (
+            <Typography color="textSecondary">Nenhum filme cadastrado ainda.</Typography>
+          ) : (
+            movies.map((movie) => (
+              <MovieItem elevation={0} key={movie.id}>
+                <div>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>{movie.title}</Typography>
+                  <Typography variant="body2" color="textSecondary">Ano: {movie.year} • Nota: {movie.rating}</Typography>
+                </div>
+                <div>
+                  <IconButton color="primary" onClick={() => handleEdit(movie)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton color="error" onClick={() => handleDelete(movie.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </div>
+              </MovieItem>
+            ))
+          )}
         </MovieListContainer>
 
       </AdminContainer>
