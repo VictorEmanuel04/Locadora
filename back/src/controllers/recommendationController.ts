@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 export async function getRecommendations(request: Request, response: Response) {
   const userId = String(request.user?.id);
@@ -50,7 +50,7 @@ export async function getRecommendations(request: Request, response: Response) {
     });
 
     return response.json({ data: recommendations, reason: `Porque você assiste muito ${favoriteGenre}` });
-  } catch (error) {
+  } catch {
     return response.status(500).json({ error: "Erro ao buscar recomendações." });
   }
 }

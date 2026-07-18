@@ -34,7 +34,14 @@ export const SectionTitle = styled(Typography)`
   }
 `;
 
-// Estilizando a barra de pesquisa arredondada que aparece na sua imagem
+// Container flexível para alinhar a Busca e o Filtro
+export const FilterContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+`;
+
 export const SearchContainer = styled.div`
   display: flex;
   align-items: center;
@@ -42,7 +49,7 @@ export const SearchContainer = styled.div`
   border-radius: 50px;
   padding: 4px 16px;
   width: 100%;
-  max-width: 400px;
+  min-width: 250px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: border-color 0.3s;
 
@@ -85,7 +92,7 @@ export const MovieCover = styled.div<{ imageUrl?: string }>`
   width: 100%;
   aspect-ratio: 2 / 3;
   background-color: ${themeConfig.surface};
-  background-image: url(${props => props.imageUrl || ''});
+  background-image: url(${props => props.imageUrl || 'https://via.placeholder.com/220x330'});
   background-size: cover;
   background-position: center;
   border-radius: 12px;
@@ -95,4 +102,13 @@ export const MovieCover = styled.div<{ imageUrl?: string }>`
 
 export const MovieInfo = styled.div`
   padding: 0 4px;
+`;
+
+// Novo container para alinhar os botões de página
+export const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 `;

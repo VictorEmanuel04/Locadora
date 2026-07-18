@@ -22,21 +22,26 @@ import {
 } from './Admin.styles';
 
 // Importando a instância do Axios (Ajuste o caminho conforme sua estrutura)
-import { api } from '../../services/api';
+import { api, getApiError } from '../../services/api';
 
 // --- TIPAGENS ---
 interface Movie {
   id: string;
   title: string;
-  description: string;
-  year: number;
-  rating: number;
+  synopsis: string;
+  genre: string;
+  releaseYear?: number | null;
+  rentalPrice: string | number;
+  stock: number;
+  discountPercentage: number;
 }
+
+type MovieForm = Omit<Movie, 'id'>;
 
 // --- COMPONENTE PRINCIPAL ---
 export default function AdminMovies() {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [formData, setFormData] = useState<Partial<Movie>>({});
+  const [formData, setFormData] = useState<Partial<MovieForm>>({ stock: 1, discountPercentage: 0 });
   const [editingId, setEditingId] = useState<string | null>(null);
 
   // Busca os filmes com Axios
@@ -44,13 +49,15 @@ export default function AdminMovies() {
     try {
       const response = await api.get('/movies');
       setMovies(response.data.data);
-    } catch (error: any) {
-      console.error("Erro ao carregar filmes:", error.response?.data?.error || error.message);
+    } catch (error: unknown) {
+      console.error("Erro ao carregar filmes:", getApiError(error, "Erro ao carregar filmes."));
     }
   };
 
   useEffect(() => {
-    fetchMovies();
+    // Busca assíncrona de um recurso externo após a primeira renderização.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchMovies();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,26 +70,27 @@ export default function AdminMovies() {
     // Converte ano e nota para Number para evitar erros de tipagem no Prisma (backend)
     const payload = {
       ...formData,
-      year: formData.year ? Number(formData.year) : undefined,
-      rating: formData.rating ? Number(formData.rating) : undefined,
+      releaseYear: formData.releaseYear ? Number(formData.releaseYear) : undefined,
+      rentalPrice: formData.rentalPrice ? Number(formData.rentalPrice) : undefined,
+      stock: formData.stock ? Number(formData.stock) : 1,
+      discountPercentage: Number(formData.discountPercentage ?? 0),
     };
     
     try {
       if (editingId) {
         // Rota de PUT (Update)
-        await api.put(`/movies/${editingId}`, payload);
+        await api.put(`/admin/movies/${editingId}`, payload);
       } else {
         // Rota de POST (Create)
-        await api.post('/movies', payload);
+        await api.post('/admin/movies', payload);
       }
       
       // Limpa os campos e recarrega a lista
       setFormData({});
       setEditingId(null);
       fetchMovies();
-    } catch (error: any) {
-      console.error("Erro ao salvar:", error);
-      alert(error.response?.data?.error || "Erro ao salvar o filme.");
+    } catch (error: unknown) {
+      alert(getApiError(error, "Erro ao salvar o filme."));
     }
   };
 
@@ -92,17 +100,24 @@ export default function AdminMovies() {
 
     try {
       // Rota de DELETE
-      await api.delete(`/movies/${id}`);
+      await api.delete(`/admin/movies/${id}`);
       fetchMovies(); // Recarrega a lista
-    } catch (error: any) {
-      console.error("Erro ao excluir:", error);
-      alert(error.response?.data?.error || "Erro ao excluir o filme.");
+    } catch (error: unknown) {
+      alert(getApiError(error, "Erro ao excluir o filme."));
     }
   };
 
   const handleEdit = (movie: Movie) => {
     setEditingId(movie.id);
-    setFormData(movie);
+    setFormData({
+      title: movie.title,
+      synopsis: movie.synopsis,
+      genre: movie.genre,
+      releaseYear: movie.releaseYear,
+      rentalPrice: movie.rentalPrice,
+      stock: movie.stock,
+      discountPercentage: movie.discountPercentage,
+    });
   };
 
   return (
@@ -120,7 +135,7 @@ export default function AdminMovies() {
           
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={8}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Título do Filme"
@@ -131,25 +146,25 @@ export default function AdminMovies() {
                   required
                 />
               </Grid>
-              <Grid item xs={12} sm={2}>
+              <Grid item xs={12} sm={3}>
                 <TextField
                   fullWidth
-                  label="Ano"
-                  name="year"
+                  label="Ano de lançamento"
+                  name="releaseYear"
                   type="number"
-                  value={formData.year || ''}
+                  value={formData.releaseYear || ''}
                   onChange={handleInputChange}
                   required
                 />
               </Grid>
-              <Grid item xs={12} sm={2}>
+              <Grid item xs={12} sm={3}>
                 <TextField
                   fullWidth
-                  label="Nota (Ex: 4.5)"
-                  name="rating"
+                  label="Preço da locação"
+                  name="rentalPrice"
                   type="number"
-                  inputProps={{ step: 0.1 }}
-                  value={formData.rating || ''}
+                  inputProps={{ step: "0.01", min: 0 }}
+                  value={formData.rentalPrice || ''}
                   onChange={handleInputChange}
                 />
               </Grid>
@@ -157,12 +172,21 @@ export default function AdminMovies() {
                 <TextField
                   fullWidth
                   label="Sinopse"
-                  name="description"
+                  name="synopsis"
                   multiline
                   rows={3}
-                  value={formData.description || ''}
+                  value={formData.synopsis || ''}
                   onChange={handleInputChange}
                 />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth label="Gênero" name="genre" value={formData.genre || ''} onChange={handleInputChange} required />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth label="Estoque" name="stock" type="number" inputProps={{ min: 0 }} value={formData.stock ?? 1} onChange={handleInputChange} required />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth label="Desconto (%)" name="discountPercentage" type="number" inputProps={{ min: 0, max: 100 }} value={formData.discountPercentage ?? 0} onChange={handleInputChange} />
               </Grid>
               <Grid item xs={12}>
                 <Button 
@@ -200,7 +224,7 @@ export default function AdminMovies() {
               <MovieItem elevation={0} key={movie.id}>
                 <div>
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>{movie.title}</Typography>
-                  <Typography variant="body2" color="textSecondary">Ano: {movie.year} • Nota: {movie.rating}</Typography>
+                  <Typography variant="body2" color="textSecondary">{movie.genre} • {movie.releaseYear ?? 'Ano não informado'} • R$ {Number(movie.rentalPrice).toFixed(2)}</Typography>
                 </div>
                 <div>
                   <IconButton color="primary" onClick={() => handleEdit(movie)}>

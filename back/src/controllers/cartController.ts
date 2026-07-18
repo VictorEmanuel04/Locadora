@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 export async function addToCart(request: Request, response: Response) {
   const userId = String(request.user?.id);
@@ -24,7 +24,7 @@ export async function addToCart(request: Request, response: Response) {
     });
 
     return response.status(201).json({ data: cartItem });
-  } catch (error) {
+  } catch {
     return response.status(500).json({ error: "Erro ao adicionar ao carrinho." });
   }
 }
@@ -44,7 +44,7 @@ export async function getCart(request: Request, response: Response) {
     });
 
     return response.json({ data: cartItems });
-  } catch (error) {
+  } catch {
     return response.status(500).json({ error: "Erro ao buscar carrinho." });
   }
 }
@@ -59,8 +59,8 @@ export async function removeFromCart(request: Request, response: Response) {
     });
 
     return response.status(204).send();
-  } catch (error: any) {
-    if (error.code === 'P2025') {
+  } catch (error: unknown) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2025") {
       return response.status(404).json({ error: "Item não encontrado no carrinho." });
     }
     return response.status(500).json({ error: "Erro ao remover item do carrinho." });

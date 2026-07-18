@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { processCheckout, listUserRentals, processRenewal } from "../services/rentalService";
+import { processCheckout, listUserRentals, processRenewal } from "../services/rentalService.js";
 
 export async function checkout(request: Request, response: Response) {
   const userId = request.user?.id;
@@ -12,8 +12,9 @@ export async function checkout(request: Request, response: Response) {
   try {
     const rentals = await processCheckout(userId, movieIds);
     return response.status(201).json({ data: rentals });
-  } catch (error: any) {
-    return response.status(400).json({ error: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Não foi possível concluir a locação.";
+    return response.status(400).json({ error: message });
   }
 }
 
@@ -27,7 +28,7 @@ export async function listMyRentals(request: Request, response: Response) {
   try {
     const rentalsData = await listUserRentals(userId);
     return response.json({ data: rentalsData });
-  } catch (error) {
+  } catch {
     return response.status(500).json({ error: "Erro interno ao buscar locacoes." });
   }
 }
@@ -43,9 +44,12 @@ export async function renewRental(request: Request, response: Response) {
   try {
     const renewal = await processRenewal(userId, rentalId);
     return response.status(201).json({ data: renewal });
-  } catch (error: any) {
-    if (error.message === "NOT_FOUND") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "NOT_FOUND") {
       return response.status(404).json({ error: "Locacao nao encontrada ou nao pertence a este usuario." });
+    }
+    if (error instanceof Error && error.message === "NOT_EXPIRED") {
+      return response.status(400).json({ error: "A locação só pode ser renovada após expirar." });
     }
     return response.status(500).json({ error: "Erro interno ao renovar locacao." });
   }

@@ -1,6 +1,6 @@
 import { MovieAvailability, RentalStatus } from "@prisma/client";
-import { env } from "../config/env";
-import { prisma } from "../lib/prisma";
+import { env } from "../config/env.js";
+import { prisma } from "../lib/prisma.js";
 
 function buildExpirationDate() {
     const expiresAt = new Date();
@@ -9,35 +9,45 @@ function buildExpirationDate() {
 }
 
 export async function processCheckout(userId: string, movieIds: string[]) {
-    const movies = await prisma.movie.findMany({
-        where: {
-            id: { in: movieIds },
-            availability: MovieAvailability.AVAILABLE,
-            stock: { gt: 0 }
-        }
-    })
+  const uniqueMovieIds = [...new Set(movieIds)];
+  if (uniqueMovieIds.length !== movieIds.length) {
+    throw new Error("Não é permitido alugar o mesmo filme mais de uma vez no pedido.");
+  }
 
-    if (movies.length !== movieIds.length) {
-        throw new Error ("Filme indisponível!")
+  return prisma.$transaction(async (tx) => {
+    const movies = await tx.movie.findMany({
+      where: {
+        id: { in: uniqueMovieIds },
+        availability: MovieAvailability.AVAILABLE,
+        stock: { gt: 0 }
+      }
+    });
+
+    if (movies.length !== uniqueMovieIds.length) {
+      throw new Error("Um ou mais filmes estão indisponíveis.");
     }
 
-    const rentals = await prisma.$transaction(
-        movies.map((movie) => 
-        prisma.rental.create({
-            data: {
-                userId,
-                movieId: movie.id,
-                expiresAt: buildExpirationDate(),
-                pricePaid: movie.rentalPrice,
-                status: RentalStatus.ACTIVE
-            }
-        }))
-    )
+    for (const movie of movies) {
+      const updated = await tx.movie.updateMany({
+        where: { id: movie.id, stock: { gt: 0 }, availability: MovieAvailability.AVAILABLE },
+        data: { stock: { decrement: 1 } }
+      });
+      if (updated.count !== 1) throw new Error("Um ou mais filmes ficaram indisponíveis.");
+    }
 
-    await prisma.cartItem.deleteMany({
-        where: { userId, movieId: { in: movieIds } }
-    })
-    return rentals
+    const rentals = await Promise.all(movies.map((movie) => tx.rental.create({
+      data: {
+        userId,
+        movieId: movie.id,
+        expiresAt: buildExpirationDate(),
+        pricePaid: movie.rentalPrice.mul(100 - movie.discountPercentage).div(100),
+        status: RentalStatus.ACTIVE
+      }
+    })));
+
+    await tx.cartItem.deleteMany({ where: { userId, movieId: { in: uniqueMovieIds } } });
+    return rentals;
+  });
 }
 
 
@@ -79,6 +89,9 @@ export async function processRenewal(userId: string, rentalId: string) {
 
   if (!previousRental) {
     throw new Error("NOT_FOUND"); // Lançamos um erro específico para o Controller tratar
+  }
+  if (previousRental.status === RentalStatus.ACTIVE && previousRental.expiresAt > new Date()) {
+    throw new Error("NOT_EXPIRED");
   }
 
   const renewal = await prisma.rental.create({

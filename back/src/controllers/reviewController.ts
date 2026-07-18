@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 export async function createOrUpdateReview(request: Request, response: Response) {
   const userId = request.user?.id;
@@ -11,7 +11,7 @@ export async function createOrUpdateReview(request: Request, response: Response)
   }
 
   // Validação simples de nota de 1 a 5
-  if (rating < 1 || rating > 5) {
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     return response.status(400).json({ error: "A nota deve ser entre 1 e 5." });
   }
 
@@ -28,7 +28,7 @@ export async function createOrUpdateReview(request: Request, response: Response)
     });
 
     return response.status(200).json({ data: review });
-  } catch (error) {
+  } catch {
     return response.status(500).json({ error: "Erro interno ao salvar a avaliação." });
   }
 }
@@ -53,7 +53,7 @@ export async function getMovieReviews(request: Request, response: Response) {
       data: reviews,
       meta: { averageRating, totalReviews: reviews.length }
     });
-  } catch (error) {
+  } catch {
     return response.status(500).json({ error: "Erro ao buscar as avaliações do filme." });
   }
 }

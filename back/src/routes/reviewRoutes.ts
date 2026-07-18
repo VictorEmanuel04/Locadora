@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { createOrUpdateReview, getMovieReviews } from "../controllers/reviewController";
-import { ensureAuthenticated } from "../middlewares/auth";
+import { createOrUpdateReview, getMovieReviews } from "../controllers/reviewController.js";
+import { ensureAuthenticated } from "../middlewares/auth.js";
 
 const reviewRoutes = Router();
 

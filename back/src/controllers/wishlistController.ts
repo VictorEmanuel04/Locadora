@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 export async function addToWishlist(request: Request, response: Response) {
   // Assumindo que seu middleware de auth coloca o usuário no request
@@ -27,7 +27,7 @@ export async function addToWishlist(request: Request, response: Response) {
     });
 
     return response.status(201).json({ data: wishlistItem });
-  } catch (error) {
+  } catch {
     return response.status(500).json({ error: "Erro interno ao adicionar à wishlist." });
   }
 }
@@ -48,7 +48,7 @@ export async function getMyWishlist(request: Request, response: Response) {
     });
 
     return response.json({ data: wishlist });
-  } catch (error) {
+  } catch {
     return response.status(500).json({ error: "Erro ao buscar lista de desejos." });
   }
 }
@@ -67,8 +67,8 @@ export async function removeFromWishlist(request: Request, response: Response) {
     });
 
     return response.status(204).send(); // 204 = No Content (sucesso, sem corpo de resposta)
-  } catch (error: any) {
-    if (error.code === 'P2025') {
+  } catch (error: unknown) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2025") {
       return response.status(404).json({ error: "Filme não encontrado na sua wishlist." });
     }
     return response.status(500).json({ error: "Erro ao remover da lista de desejos." });

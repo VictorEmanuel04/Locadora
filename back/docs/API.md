@@ -32,7 +32,7 @@ back/
 
 O schema completo esta em `prisma/schema.prisma`.
 
-## Endpoints Sugeridos
+## Endpoints Implementados
 
 ### Auth
 
@@ -43,8 +43,10 @@ O schema completo esta em `prisma/schema.prisma`.
 
 - `GET /api/movies`: lista filmes com filtros `search`, `genre` e `available=true`.
 - `GET /api/movies/:id`: detalha filme com avaliacoes.
-- `GET /api/movies/recommendations/top-rated`: sugestao futura baseada em media de `Review`.
-- `GET /api/movies/recommendations/by-genre`: sugestao futura baseada nos generos alugados pelo usuario.
+
+### Recomendacoes
+
+- `GET /api/recommendations`: rota autenticada; sugere filmes pelo gênero mais alugado ou lançamentos para novos clientes.
 
 ### Rentals
 
@@ -52,29 +54,25 @@ O schema completo esta em `prisma/schema.prisma`.
 - `POST /api/rentals/checkout`: simula pagamento e cria locacoes ativas.
 - `POST /api/rentals/:id/renew`: renova ou recompra uma locacao.
 
-### Users
+### Carrinho e wishlist
 
-- `GET /api/users/me`: dados do painel.
-- `GET /api/users/me/wishlist`: lista de desejos.
-- `POST /api/users/me/wishlist`: adiciona filme a lista.
-- `DELETE /api/users/me/wishlist/:movieId`: remove filme da lista.
-- `GET /api/users/me/cart`: carrinho.
-- `POST /api/users/me/cart`: adiciona filme ao carrinho.
-- `DELETE /api/users/me/cart/:movieId`: remove filme do carrinho.
+- `GET /api/wishlist`: lista de desejos do usuário autenticado.
+- `POST /api/wishlist`: adiciona filme à lista de desejos.
+- `DELETE /api/wishlist/:movieId`: remove filme da lista de desejos.
+- `GET /api/cart`: carrinho do usuário autenticado.
+- `POST /api/cart`: adiciona filme ao carrinho.
+- `DELETE /api/cart/:movieId`: remove filme do carrinho.
 
 ### Reviews
 
-- `POST /api/movies/:movieId/reviews`: cria ou atualiza avaliacao.
-- `DELETE /api/reviews/:id`: remove avaliacao do proprio usuario ou por admin.
+- `GET /api/reviews/movie/:movieId`: lista avaliações públicas de um filme.
+- `POST /api/reviews`: cria ou atualiza a avaliação do usuário autenticado.
 
 ### Admin
 
 - `POST /api/admin/movies`: cadastra filme.
 - `PUT /api/admin/movies/:id`: edita filme.
 - `DELETE /api/admin/movies/:id`: remove filme.
-- `PATCH /api/admin/movies/:id/availability`: altera disponibilidade.
-- `GET /api/admin/rentals`: acompanha locacoes.
-- `POST /api/admin/promotions`: promocao simulada alterando preco dos filmes.
 
 ## Regras de Negocio Iniciais
 

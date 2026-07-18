@@ -19,8 +19,8 @@ import {
 } from './Auth.styles';
 
 // Importando a instância do Axios e o Contexto de Autenticação
-import { api } from '../../services/api';
-import { AuthContext } from '../../context/AuthContext';
+import { api, getApiError } from '../../services/api';
+import { AuthContext } from '../../context/authContext';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -68,9 +68,9 @@ export default function Auth() {
       // Redireciona o usuário para a página principal (Catálogo)
       navigate('/');
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Captura a mensagem de erro que vem do seu backend (ex: "Credenciais inválidas")
-      setError(err.response?.data?.error || 'Ocorreu um erro inesperado.');
+      setError(getApiError(err, 'Ocorreu um erro inesperado.'));
     } finally {
       setLoading(false);
     }

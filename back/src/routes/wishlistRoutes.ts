@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { addToWishlist, getMyWishlist, removeFromWishlist } from "../controllers/wishlistController";
-import { ensureAuthenticated } from "../middlewares/auth"; // Ajuste o nome do import se necessário
+import { addToWishlist, getMyWishlist, removeFromWishlist } from "../controllers/wishlistController.js";
+import { ensureAuthenticated } from "../middlewares/auth.js";
 
 const wishlistRoutes = Router();
 
