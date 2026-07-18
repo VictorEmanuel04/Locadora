@@ -10,7 +10,6 @@ import {
 } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 
-// Importando os estilos e o tema do arquivo .styles
 import { 
   muiTheme, 
   AdminContainer, 
@@ -20,10 +19,8 @@ import {
   MovieItem 
 } from './Admin.styles';
 
-// Importando a instância do Axios (Ajuste o caminho conforme sua estrutura)
 import { api, getApiError } from '../../services/api';
 
-// --- TIPAGENS ---
 interface Movie {
   id: string;
   title: string;
@@ -38,13 +35,11 @@ interface Movie {
 
 type MovieForm = Omit<Movie, 'id'>;
 
-// --- COMPONENTE PRINCIPAL ---
 export default function AdminMovies() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [formData, setFormData] = useState<Partial<MovieForm>>({ stock: 1, discountPercentage: 0 });
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Busca os filmes com Axios
   const fetchMovies = async () => {
     try {
       const response = await api.get('/movies');
@@ -55,7 +50,7 @@ export default function AdminMovies() {
   };
 
   useEffect(() => {
-    // Busca assíncrona de um recurso externo após a primeira renderização.
+    // Busca assíncrona de um recurso externo após a montagem.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchMovies();
   }, []);
@@ -67,7 +62,6 @@ export default function AdminMovies() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Converte ano e nota para Number para evitar erros de tipagem no Prisma (backend)
     const payload = {
       ...formData,
       releaseYear: formData.releaseYear ? Number(formData.releaseYear) : undefined,
@@ -78,14 +72,11 @@ export default function AdminMovies() {
     
     try {
       if (editingId) {
-        // Rota de PUT (Update)
         await api.put(`/admin/movies/${editingId}`, payload);
       } else {
-        // Rota de POST (Create)
         await api.post('/admin/movies', payload);
       }
       
-      // Limpa os campos e recarrega a lista
       setFormData({});
       setEditingId(null);
       fetchMovies();
@@ -228,7 +219,6 @@ export default function AdminMovies() {
             Catálogo Existente
           </Typography>
           
-          {/* Mapeamento dinâmico dos filmes do backend */}
           {movies.length === 0 ? (
             <Typography color="textSecondary">Nenhum filme cadastrado ainda.</Typography>
           ) : (

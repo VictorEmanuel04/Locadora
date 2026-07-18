@@ -4,7 +4,6 @@ import { ensureAuthenticated } from "../middlewares/auth.js";
 
 const wishlistRoutes = Router();
 
-// Todas as rotas de wishlist precisam de usuário logado
 wishlistRoutes.use(ensureAuthenticated);
 
 wishlistRoutes.post("/", addToWishlist);

@@ -1,7 +1,6 @@
 import { MovieAvailability, Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 
-// Interface para tipar os filtros que vêm da query string
 export interface MovieFilters {
   search?: string;
   genre?: string;
@@ -13,7 +12,6 @@ export interface MovieFilters {
 export async function fetchMovies(filters: MovieFilters) {
   const { search, genre, available, page, limit } = filters;
 
-  // Cálculo de quantos registros pular com base na página atual
   const skip = (page - 1) * limit;
 
   // Montagem tipada das condições
@@ -30,12 +28,11 @@ export async function fetchMovies(filters: MovieFilters) {
       : {})
   };
 
-  // Promise.all executa as duas queries simultaneamente no banco para otimizar tempo de resposta
   const [movies, totalCount] = await Promise.all([
     prisma.movie.findMany({
       where,
-      skip,        // Adicionado: Pula os itens das páginas anteriores
-      take: limit, // Adicionado: Limita a quantidade de itens trazidos
+      skip,        
+      take: limit, 
       orderBy: { title: "asc" },
       include: {
         _count: {
@@ -43,12 +40,12 @@ export async function fetchMovies(filters: MovieFilters) {
         }
       }
     }),
-    prisma.movie.count({ where }) // Adicionado: Conta o total de registros que casam com o filtro
+    prisma.movie.count({ where }) 
   ]);
 
   const totalPages = Math.ceil(totalCount / limit);
 
-  // Retorno modificado: Agora entrega os dados + metadados de paginação
+
   return {
     data: movies,
     meta: {
@@ -67,7 +64,7 @@ export async function fetchMovieById(movieId: string) {
       reviews: {
         include: {
           user: {
-            select: { id: true, name: true } // Protege os dados do usuário, trazendo apenas ID e Nome
+            select: { id: true, name: true } 
           }
         },
         orderBy: { createdAt: "desc" }

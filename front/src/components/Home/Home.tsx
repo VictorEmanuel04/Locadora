@@ -23,7 +23,6 @@ import {
   MoviePoster
 } from './Home.styles';
 
-// Tipagem baseada no backend
 interface Movie {
   id: string;
   title: string;
@@ -47,17 +46,14 @@ export default function Home() {
       try {
         setLoading(true);
 
-        // 1. Busca os últimos lançamentos (Rota pública, limitando a 10 filmes)
         const latestRes = await api.get('/movies?limit=10');
         const moviesList = latestRes.data.data;
         setLatestMovies(moviesList);
 
-        // Define o primeiro filme da lista como destaque no Hero Banner
         if (moviesList.length > 0) {
           setFeaturedMovie(moviesList[0]);
         }
 
-        // 2. Busca recomendações APENAS se o usuário estiver logado
         if (isAuthenticated) {
           const recRes = await api.get('/recommendations');
           setRecommendedMovies(recRes.data.data);
@@ -91,7 +87,6 @@ export default function Home() {
       <CssBaseline />
       <HomeContainer>
         
-        {/* HERO BANNER EM DESTAQUE */}
         {featuredMovie && (
           <HeroSection>
             <HeroContent>
@@ -123,7 +118,6 @@ export default function Home() {
                 </ActionButtons>
               </HeroText>
 
-              {/* Lado Direito: Pôster do Filme */}
               <HeroImage 
                 src={featuredMovie.posterUrl || 'https://via.placeholder.com/350x500?text=Sem+Capa'} 
                 alt={`Pôster do filme ${featuredMovie.title}`} 
@@ -132,7 +126,6 @@ export default function Home() {
           </HeroSection>
         )}
 
-        {/* PRATELEIRA 1: RECOMENDAÇÕES (Só aparece para logados) */}
         {isAuthenticated && recommendedMovies.length > 0 && (
           <SectionContainer>
             <SectionTitle>Recomendados para Você</SectionTitle>
@@ -153,7 +146,6 @@ export default function Home() {
           </SectionContainer>
         )}
 
-        {/* PRATELEIRA 2: LANÇAMENTOS / ADICIONADOS RECENTEMENTE */}
         <SectionContainer>
           <SectionTitle>Adicionados Recentemente</SectionTitle>
           <MovieRow>

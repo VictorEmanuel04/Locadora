@@ -1,6 +1,6 @@
 import { styled } from 'styled-components';
 import { Typography, Button } from '@mui/material';
-import { themeConfig } from '../../styles/theme'; // Ajuste o caminho se necessário
+import { themeConfig } from '../../styles/theme'; 
 
 export const HomeContainer = styled.div`
   min-height: 100vh;
@@ -13,8 +13,6 @@ export const HomeContainer = styled.div`
   padding-top: 20px;
 `;
 
-// --- HERO SECTION (Banner Principal) ---
-// --- HERO SECTION (Banner Principal) ---
 export const HeroSection = styled.div`
   margin: 40px 5%;
   padding: 60px 40px;
@@ -106,7 +104,6 @@ export const PrimaryButton = styled(Button)`
   }
 `;
 
-// --- SEÇÕES DE FILMES (Prateleiras) ---
 export const SectionContainer = styled.section`
   padding: 40px 5% 0;
 `;

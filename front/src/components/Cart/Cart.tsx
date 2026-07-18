@@ -78,7 +78,6 @@ export default function Cart() {
   const handleRemoveItem = async (movieId: string) => {
     try {
       await api.delete(`/cart/${movieId}`);
-      // Atualiza a tela removendo o item localmente sem precisar dar reload
       setCartItems(prev => prev.filter(item => item.movieId !== movieId));
     } catch (err: unknown) {
       setError(getApiError(err, 'Erro ao remover item.'));
@@ -90,21 +89,16 @@ export default function Cart() {
       setProcessing(true);
       setError(null);
       
-      // Assumindo que você tem uma rota para processar o aluguel no seu rentalController
-      // Normalmente você mandaria os dados de pagamento aqui se não fosse uma simulação
       await api.post('/rentals/checkout', { 
         movieIds: cartItems.map(item => item.movieId) 
       });
 
-      // Se o backend não limpa o carrinho automaticamente após o aluguel,
-      // você precisaria chamar um api.delete('/cart/clear') aqui.
 
       setSuccess(true);
       setCartItems([]);
       
-      // Redireciona para o painel do usuário após alguns segundos
       setTimeout(() => {
-        navigate('/perfil'); // Rota do painel que faremos depois
+        navigate('/perfil'); 
       }, 3000);
 
     } catch (err: unknown) {

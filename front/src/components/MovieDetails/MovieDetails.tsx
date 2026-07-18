@@ -32,7 +32,6 @@ import {
   ReviewCard
 } from './MovieDetails.styles';
 
-// Tipagem com base no Prisma
 interface Review {
   id: string;
   rating: number;
@@ -120,10 +119,9 @@ export default function MovieDetails() {
     if (!window.confirm("Tem certeza que deseja excluir esta avaliação?")) return;
     
     try {
-      // Chama a rota de admin que acabamos de criar
       await api.delete(`/admin/reviews/${reviewId}`);
       setMessage({ text: 'Avaliação excluída pelo Admin!', type: 'success' });
-      fetchMovie(); // Recarrega os dados do filme para a avaliação sumir da tela
+      fetchMovie();
     } catch (error: unknown) {
       setMessage({ text: getApiError(error, 'Erro ao excluir avaliação.'), type: 'error' });
     }
@@ -232,11 +230,9 @@ export default function MovieDetails() {
           </InfoSection>
         </ContentWrapper>
 
-        {/* SEÇÃO DE AVALIAÇÕES */}
         <ContentWrapper style={{ marginTop: '24px', display: 'block' }}>
           <SectionHeading>Avaliações dos Usuários</SectionHeading>
 
-          {/* Formulário para adicionar nova avaliação */}
           {isAuthenticated ? (
             <ReviewCard elevation={0} sx={{ mb: 4, borderLeft: '4px solid #635BFF' }}>
               <Typography variant="subtitle1" sx = {{fontWeight:"bold", mb:2}}>Deixe sua opinião</Typography>
@@ -270,7 +266,6 @@ export default function MovieDetails() {
             </Typography>
           )}
 
-          {/* Lista de Avaliações */}
           {movie.reviews.length === 0 ? (
             <Typography color="text.secondary">Nenhuma avaliação ainda. Seja o primeiro!</Typography>
           ) : (
@@ -310,10 +305,8 @@ export default function MovieDetails() {
                     </Box>
                   </Box>
                   
-                  {/* A margin-left: auto empurra as estrelas (e o botão) para a direita */}
                   <Rating value={review.rating} readOnly size="small" sx={{ ml: 'auto', color: '#FFD700' }} />
                   
-                  {/* SÓ APARECE PARA O ADMIN */}
                   {user?.role === 'ADMIN' && (
                     <IconButton 
                       size="small" 

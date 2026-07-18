@@ -1,6 +1,6 @@
 import { styled } from 'styled-components';
 import { Paper, Typography } from '@mui/material';
-import { themeConfig } from '../../styles/theme'; // Ajuste o caminho se necessário
+import { themeConfig } from '../../styles/theme'; 
 
 export const PageContainer = styled.div`
   min-height: 100vh;
@@ -8,7 +8,6 @@ export const PageContainer = styled.div`
   padding-bottom: 80px;
 `;
 
-// Banner de fundo sutil
 export const Backdrop = styled.div<{ bgimage?: string }>`
   height: 50vh;
   min-height: 400px;

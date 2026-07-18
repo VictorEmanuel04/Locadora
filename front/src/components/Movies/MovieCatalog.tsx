@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { themeConfig } from '../../styles/theme'; 
 import { 
   ThemeProvider as MuiThemeProvider, 
   CssBaseline, 
@@ -25,7 +27,6 @@ import {
   MovieCover, 
   MovieInfo,
   PaginationContainer,
-  themeConfig
 } from './MovieCatalog.styles';
 
 import { api, getApiError } from '../../services/api';

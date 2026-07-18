@@ -1,112 +1,49 @@
 import type { Request, Response } from "express";
-import { MovieAvailability, type Prisma } from "@prisma/client";
-import { prisma } from "../lib/prisma.js";
-
-type MovieInput = {
-  title?: unknown;
-  synopsis?: unknown;
-  genre?: unknown;
-  director?: unknown;
-  releaseYear?: unknown;
-  durationMinutes?: unknown;
-  ageRating?: unknown;
-  posterUrl?: unknown;
-  trailerUrl?: unknown;
-  rentalPrice?: unknown;
-  discountPercentage?: unknown;
-  availability?: unknown;
-  stock?: unknown;
-};
-
-function validateMovieInput(body: MovieInput, partial = false) {
-  const data: Record<string, string | number | MovieAvailability | null> = {};
-  const requiredText = ["title", "synopsis", "genre"] as const;
-  for (const field of requiredText) {
-    const value = body[field];
-    if (!partial && (typeof value !== "string" || !value.trim())) {
-      throw Object.assign(new Error(`${field} é obrigatório.`), { statusCode: 400 });
-    }
-    if (value !== undefined) {
-      if (typeof value !== "string" || !value.trim()) throw Object.assign(new Error(`${field} inválido.`), { statusCode: 400 });
-      data[field] = value.trim();
-    }
-  }
-
-  for (const field of ["director", "ageRating", "posterUrl", "trailerUrl"] as const) {
-    const value = body[field];
-    if (value !== undefined) {
-      if (value !== null && typeof value !== "string") throw Object.assign(new Error(`${field} inválido.`), { statusCode: 400 });
-      data[field] = value === null ? null : value.trim();
-    }
-  }
-
-  for (const field of ["releaseYear", "durationMinutes", "discountPercentage", "stock"] as const) {
-    const value = body[field];
-    if (value !== undefined) {
-      const number = Number(value);
-      if (!Number.isInteger(number) || number < 0 || (field === "discountPercentage" && number > 100)) {
-        throw Object.assign(new Error(`${field} inválido.`), { statusCode: 400 });
-      }
-      data[field] = number;
-    }
-  }
-
-  if (!partial && body.rentalPrice === undefined) throw Object.assign(new Error("rentalPrice é obrigatório."), { statusCode: 400 });
-  if (body.rentalPrice !== undefined) {
-    const price = Number(body.rentalPrice);
-    if (!Number.isFinite(price) || price < 0) throw Object.assign(new Error("rentalPrice inválido."), { statusCode: 400 });
-    data.rentalPrice = price;
-  }
-
-  if (body.availability !== undefined) {
-    if (!Object.values(MovieAvailability).includes(body.availability as MovieAvailability)) {
-      throw Object.assign(new Error("availability inválida."), { statusCode: 400 });
-    }
-    data.availability = body.availability as MovieAvailability;
-  }
-  return data;
-}
+import {
+  createCatalogMovie,
+  deleteCatalogMovie,
+  deleteReviewByAdmin,
+  updateCatalogMovie
+} from "../services/adminService.js";
+import { isServiceError } from "../services/serviceError.js";
 
 export async function createMovie(request: Request, response: Response) {
-  const movie = await prisma.movie.create({
-    data: validateMovieInput(request.body) as unknown as Prisma.MovieCreateInput
-  });
-
-  return response.status(201).json({ data: movie });
+  try {
+    const movie = await createCatalogMovie(request.body);
+    return response.status(201).json({ data: movie });
+  } catch (error) {
+    if (isServiceError(error) && error.code === "INVALID_MOVIE_DATA") {
+      return response.status(400).json({ error: error.message });
+    }
+    throw error;
+  }
 }
 
 export async function updateMovie(request: Request, response: Response) {
-  const movieId = String(request.params.id);
-
-  const movie = await prisma.movie.update({
-    where: { id: movieId },
-    data: validateMovieInput(request.body, true) as unknown as Prisma.MovieUpdateInput
-  });
-
-  return response.json({ data: movie });
+  try {
+    const movie = await updateCatalogMovie(String(request.params.id), request.body);
+    return response.json({ data: movie });
+  } catch (error) {
+    if (isServiceError(error) && error.code === "INVALID_MOVIE_DATA") {
+      return response.status(400).json({ error: error.message });
+    }
+    throw error;
+  }
 }
 
 export async function deleteMovie(request: Request, response: Response) {
-  const movieId = String(request.params.id);
-
-  await prisma.movie.delete({
-    where: { id: movieId }
-  });
-
+  await deleteCatalogMovie(String(request.params.id));
   return response.status(204).send();
 }
 
 export async function deleteReview(request: Request, response: Response) {
-  const reviewId = String(request.params.id);
-
   try {
-    // Substitua "review" pelo nome exato do seu model no Prisma (pode ser "rating", "comment", etc)
-    await prisma.review.delete({
-      where: { id: reviewId }
-    });
-
+    await deleteReviewByAdmin(String(request.params.id));
     return response.status(204).send();
   } catch (error) {
-    return response.status(400).json({ error: "Erro ao excluir avaliação." });
+    if (isServiceError(error) && error.code === "REVIEW_NOT_FOUND") {
+      return response.status(404).json({ error: error.message });
+    }
+    return response.status(500).json({ error: "Erro ao excluir avaliação." });
   }
 }

@@ -1,14 +1,7 @@
 import { styled } from 'styled-components';
 import { Paper, Typography, InputBase } from '@mui/material';
 
-// Paleta de cores do Cinerent
-export const themeConfig = {
-  background: '#0D0D12',
-  surface: '#1A1A24',
-  primary: '#635BFF', 
-  textPrimary: '#FFFFFF',
-  textSecondary: '#A0A0B0',
-};
+import { themeConfig } from '../../styles/theme'; 
 
 export const CatalogContainer = styled.div`
   padding: 40px 20px;
@@ -34,7 +27,6 @@ export const SectionTitle = styled(Typography)`
   }
 `;
 
-// Container flexível para alinhar a Busca e o Filtro
 export const FilterContainer = styled.div`
   display: flex;
   align-items: center;
@@ -104,7 +96,6 @@ export const MovieInfo = styled.div`
   padding: 0 4px;
 `;
 
-// Novo container para alinhar os botões de página
 export const PaginationContainer = styled.div`
   display: flex;
   justify-content: center;

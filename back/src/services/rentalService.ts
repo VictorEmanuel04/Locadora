@@ -77,14 +77,12 @@ export async function listUserRentals(userId: string) {
     data: { status: RentalStatus.EXPIRED }
   });
 
-  // Busca todas as locações do usuário
   const rentals = await prisma.rental.findMany({
     where: { userId },
     include: { movie: true },
     orderBy: { createdAt: "desc" }
   });
 
-  // Retorna o objeto já separado em ativos e expirados
   return {
     active: rentals.filter((rental) => rental.status === RentalStatus.ACTIVE && rental.expiresAt >= now),
     expired: rentals.filter((rental) => rental.status === RentalStatus.EXPIRED || rental.expiresAt < now)
@@ -101,7 +99,7 @@ export async function processRenewal(userId: string, rentalId: string) {
   });
 
   if (!previousRental) {
-    throw new Error("NOT_FOUND"); // Lançamos um erro específico para o Controller tratar
+    throw new Error("NOT_FOUND"); 
   }
   if (previousRental.status === RentalStatus.ACTIVE && previousRental.expiresAt > new Date()) {
     throw new Error("NOT_EXPIRED");

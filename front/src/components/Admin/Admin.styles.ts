@@ -1,7 +1,6 @@
 import { styled } from 'styled-components';
 import { createTheme, Paper, Typography } from '@mui/material';
 
-// --- TEMAS GLOBAIS ---
 import { themeConfig } from '../../styles/theme';
 
 export const muiTheme = createTheme({
@@ -37,7 +36,6 @@ export const muiTheme = createTheme({
   },
 });
 
-// --- COMPONENTES VISUAIS (STYLED COMPONENTS) ---
 export const AdminContainer = styled.div`
   padding: 40px 20px;
   max-width: 90%px;

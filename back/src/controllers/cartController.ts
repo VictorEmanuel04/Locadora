@@ -1,5 +1,10 @@
 import type { Request, Response } from "express";
-import { prisma } from "../lib/prisma.js";
+import {
+  addMovieToCart,
+  listCartItems,
+  removeMovieFromCart
+} from "../services/cartService.js";
+import { isServiceError } from "../services/serviceError.js";
 
 export async function addToCart(request: Request, response: Response) {
   const userId = String(request.user?.id);
@@ -10,21 +15,12 @@ export async function addToCart(request: Request, response: Response) {
   }
 
   try {
-    const existingItem = await prisma.cartItem.findUnique({
-      where: { userId_movieId: { userId, movieId } }
-    });
-
-    if (existingItem) {
-      return response.status(409).json({ error: "Filme já está no carrinho." });
-    }
-
-    const cartItem = await prisma.cartItem.create({
-      data: { userId, movieId },
-      include: { movie: true }
-    });
-
+    const cartItem = await addMovieToCart(userId, movieId);
     return response.status(201).json({ data: cartItem });
-  } catch {
+  } catch (error) {
+    if (isServiceError(error) && error.code === "CART_ITEM_EXISTS") {
+      return response.status(409).json({ error: error.message });
+    }
     return response.status(500).json({ error: "Erro ao adicionar ao carrinho." });
   }
 }
@@ -33,16 +29,7 @@ export async function getCart(request: Request, response: Response) {
   const userId = String(request.user?.id);
 
   try {
-    const cartItems = await prisma.cartItem.findMany({
-      where: { userId },
-      include: { 
-        movie: {
-          select: { id: true, title: true, posterUrl: true, rentalPrice: true, discountPercentage: true }
-        } 
-      },
-      orderBy: { createdAt: 'desc' }
-    });
-
+    const cartItems = await listCartItems(userId);
     return response.json({ data: cartItems });
   } catch {
     return response.status(500).json({ error: "Erro ao buscar carrinho." });
@@ -54,14 +41,11 @@ export async function removeFromCart(request: Request, response: Response) {
   const movieId = String(request.params.movieId);
 
   try {
-    await prisma.cartItem.delete({
-      where: { userId_movieId: { userId, movieId } }
-    });
-
+    await removeMovieFromCart(userId, movieId);
     return response.status(204).send();
   } catch (error: unknown) {
-    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2025") {
-      return response.status(404).json({ error: "Item não encontrado no carrinho." });
+    if (isServiceError(error) && error.code === "CART_ITEM_NOT_FOUND") {
+      return response.status(404).json({ error: error.message });
     }
     return response.status(500).json({ error: "Erro ao remover item do carrinho." });
   }
