@@ -10,13 +10,16 @@ import {
   IconButton,
   Alert
 } from '@mui/material';
-import DeleteOutlineIcon from '@mui/icons-material/Delete';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { 
+  DeleteOutline as DeleteOutlineIcon, 
+  CreditCard as CreditCardIcon, 
+  ArrowBack as ArrowBackIcon 
+} from '@mui/icons-material';
 
 import { muiTheme } from '../../styles/theme'; 
 import { api, getApiError } from '../../services/api';
 import { AuthContext } from '../../context/authContext';
+import { calculateDiscountedPrice, formatCurrency } from '../../utils/pricing';
 
 import { 
   PageContainer, 
@@ -38,6 +41,7 @@ interface CartItem {
     title: string;
     posterUrl: string;
     rentalPrice: string | number;
+    discountPercentage: number;
   };
 }
 
@@ -110,8 +114,18 @@ export default function Cart() {
     }
   };
 
-  // Cálculo do Total
-  const total = cartItems.reduce((acc, item) => acc + Number(item.movie.rentalPrice), 0);
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + Number(item.movie.rentalPrice),
+    0
+  );
+  const total = cartItems.reduce(
+    (sum, item) => sum + calculateDiscountedPrice(
+      item.movie.rentalPrice,
+      item.movie.discountPercentage
+    ),
+    0
+  );
+  const savings = subtotal - total;
 
   if (loading) {
     return (
@@ -158,8 +172,27 @@ export default function Cart() {
                       <Typography variant="h6" sx = {{fontWeight:"bold"}} color="text.primary">
                         {item.movie.title}
                       </Typography>
-                      <Typography variant="body1" color="primary.main" sx = {{fontWeight:"bold", mt: 1}}>
-                        R$ {Number(item.movie.rentalPrice).toFixed(2).replace('.', ',')}
+                      {item.movie.discountPercentage > 0 && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 1, textDecoration: 'line-through' }}
+                        >
+                          {formatCurrency(Number(item.movie.rentalPrice))}
+                        </Typography>
+                      )}
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontWeight: 'bold',
+                          mt: item.movie.discountPercentage > 0 ? 0 : 1,
+                          color: item.movie.discountPercentage > 0 ? 'warning.main' : 'primary.main'
+                        }}
+                      >
+                        {formatCurrency(calculateDiscountedPrice(
+                          item.movie.rentalPrice,
+                          item.movie.discountPercentage
+                        ))}
                       </Typography>
                     </ItemDetails>
                     <IconButton 
@@ -181,17 +214,19 @@ export default function Cart() {
 
                 <SummaryRow>
                   <span>Subtotal ({cartItems.length} itens)</span>
-                  <span>R$ {total.toFixed(2).replace('.', ',')}</span>
+                  <span>{formatCurrency(subtotal)}</span>
                 </SummaryRow>
 
-                <SummaryRow>
-                  <span>Taxas / Impostos</span>
-                  <span>R$ 0,00</span>
-                </SummaryRow>
+                {savings > 0 && (
+                  <SummaryRow>
+                    <span>Descontos</span>
+                    <span>- {formatCurrency(savings)}</span>
+                  </SummaryRow>
+                )}
 
                 <SummaryRow className="total">
                   <span>Total</span>
-                  <span>R$ {total.toFixed(2).replace('.', ',')}</span>
+                  <span>{formatCurrency(total)}</span>
                 </SummaryRow>
 
                 {/* Simulação de dados de cartão - Apenas visual para o escopo */}

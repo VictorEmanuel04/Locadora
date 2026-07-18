@@ -1,19 +1,18 @@
 import React, { useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  ThemeProvider as MuiThemeProvider, 
-  CssBaseline, 
   IconButton, 
   Avatar, 
   Menu, 
   MenuItem,
   ListItemIcon
 } from '@mui/material';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import LogoutIcon from '@mui/icons-material/Logout';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { 
+  ShoppingCart as ShoppingCartIcon, 
+  Logout as LogoutIcon, 
+  AccountCircle as AccountCircleIcon 
+} from '@mui/icons-material';
 
-import { muiTheme } from '../../styles/theme';
 import { AuthContext } from '../../context/authContext';
 
 import { 
@@ -57,9 +56,7 @@ export default function Navbar() {
   };
 
   return (
-    <MuiThemeProvider theme={muiTheme}>
-      <CssBaseline />
-      <NavContainer>
+    <NavContainer>
         <NavContent>
           
           {/* LOGO */}
@@ -81,6 +78,16 @@ export default function Navbar() {
             >
               Catálogo
             </NavLink>
+    
+            {user?.role === 'ADMIN' && (
+              <NavLink 
+                active={location.pathname === '/admin'} 
+                onClick={() => goTo('/admin')}
+                sx={{ color: '#FFD700' }}
+              >
+                Painel Admin
+              </NavLink>
+            )}
           </LinksSection>
 
           {/* AÇÕES (CARRINHO E PERFIL/LOGIN) */}
@@ -145,7 +152,6 @@ export default function Navbar() {
 
           </ActionSection>
         </NavContent>
-      </NavContainer>
-    </MuiThemeProvider>
+    </NavContainer>
   );
 }

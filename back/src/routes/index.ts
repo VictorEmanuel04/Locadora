@@ -8,6 +8,7 @@ import { cartRoutes } from "./cartRoutes.js";
 import { recommendationRoutes } from "./recommendationRoutes.js";
 import { wishlistRoutes } from "./wishlistRoutes.js";
 import { reviewRoutes } from "./reviewRoutes.js";
+import { userRoutes } from "./userRoutes.js";
 
 export const routes = Router();
 
@@ -20,3 +21,4 @@ routes.use("/recommendations", recommendationRoutes);
 routes.use("/admin", adminRoutes);
 routes.use("/wishlist", wishlistRoutes);
 routes.use("/reviews", reviewRoutes);
+routes.use("/users", userRoutes);

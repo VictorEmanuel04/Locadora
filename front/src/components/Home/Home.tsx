@@ -1,15 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeProvider as MuiThemeProvider, CssBaseline, Button, CircularProgress, Box, Typography } from '@mui/material';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { PlayArrow as PlayArrowIcon, InfoOutlined as InfoOutlinedIcon } from '@mui/icons-material';
 
 import { muiTheme } from '../../styles/theme'; 
 import { api } from '../../services/api';
 import { AuthContext } from '../../context/authContext';
 
 import { 
-  HomeContainer, 
+  HomeContainer,
+  HeroText,
+  HeroImage, 
   HeroSection, 
   HeroContent, 
   HeroTitle, 
@@ -92,32 +93,41 @@ export default function Home() {
         
         {/* HERO BANNER EM DESTAQUE */}
         {featuredMovie && (
-          <HeroSection bgimage={featuredMovie.posterUrl}>
+          <HeroSection>
             <HeroContent>
-              <HeroTitle variant="h1">{featuredMovie.title}</HeroTitle>
-              <HeroSynopsis variant="body1">
-                {featuredMovie.synopsis}
-              </HeroSynopsis>
-              
-              <ActionButtons>
-                <PrimaryButton 
-                  variant="contained" 
-                  color="primary" 
-                  startIcon={<PlayArrowIcon />}
-                  onClick={() => handleMovieClick(featuredMovie.id)}
-                >
-                  Alugar Agora
-                </PrimaryButton>
+              {/* Lado Esquerdo: Textos e Botões */}
+              <HeroText>
+                <HeroTitle variant="h1">{featuredMovie.title}</HeroTitle>
+                <HeroSynopsis variant="body1">
+                  {featuredMovie.synopsis}
+                </HeroSynopsis>
                 
-                <Button 
-                  variant="outlined" 
-                  sx={{ color: '#FFF', borderColor: 'rgba(255,255,255,0.5)', borderRadius: '8px', px: 3, fontWeight: 'bold' }}
-                  startIcon={<InfoOutlinedIcon />}
-                  onClick={() => handleMovieClick(featuredMovie.id)}
-                >
-                  Mais Informações
-                </Button>
-              </ActionButtons>
+                <ActionButtons>
+                  <PrimaryButton 
+                    variant="contained" 
+                    color="primary" 
+                    startIcon={<PlayArrowIcon />}
+                    onClick={() => handleMovieClick(featuredMovie.id)}
+                  >
+                    Alugar Agora
+                  </PrimaryButton>
+                  
+                  <Button 
+                    variant="outlined" 
+                    sx={{ color: '#FFF', borderColor: 'rgba(255,255,255,0.5)', borderRadius: '8px', px: 3, fontWeight: 'bold' }}
+                    startIcon={<InfoOutlinedIcon />}
+                    onClick={() => handleMovieClick(featuredMovie.id)}
+                  >
+                    Mais Informações
+                  </Button>
+                </ActionButtons>
+              </HeroText>
+
+              {/* Lado Direito: Pôster do Filme */}
+              <HeroImage 
+                src={featuredMovie.posterUrl || 'https://via.placeholder.com/350x500?text=Sem+Capa'} 
+                alt={`Pôster do filme ${featuredMovie.title}`} 
+              />
             </HeroContent>
           </HeroSection>
         )}

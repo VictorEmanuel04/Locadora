@@ -10,8 +10,7 @@ import {
   FormControl,
   Pagination
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import StarIcon from '@mui/icons-material/Star';
+import { Search as SearchIcon, Star as StarIcon } from '@mui/icons-material';
 
 import { muiTheme } from '../Admin/Admin.styles'; 
 import { 

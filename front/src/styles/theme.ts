@@ -1,13 +1,16 @@
 import { createTheme } from '@mui/material';
 
 export const themeConfig = {
-  background: '#0D0D12',
-  surface: '#1A1A24',
-  primary: '#635BFF', 
-  textPrimary: '#FFFFFF',
-  textSecondary: '#A0A0B0',
-  warning: '#FF9800',
-  success: '#4CAF50'
+  background: '#062333',    // Fundo: Branco Gelo
+  surface: '#FFFFFF',       // Superfície dos cards (Branco puro para destacar do fundo)
+  primary: '#E6A15C',       // Destaques (Botões): Âmbar
+  secondary: '#3A6B88',     // Usando a cor de detalhes para elementos secundários
+  textPrimary: '#FFFFFF',   // Textos e Ícones: Cinza Carvão
+  textPrimary2: '#FFFFFF',  // Mantido igual ao texto principal para manter a legibilidade
+  textSecondary: '#e9e8e8', // Detalhes (Links): Azul Petróleo
+  warning: '#FF9800',       
+  success: '#4CAF50',       
+  navbar: '#FFFFFF'         
 };
 
 export const muiTheme = createTheme({

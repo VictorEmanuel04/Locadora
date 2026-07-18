@@ -1,4 +1,4 @@
-import { MovieAvailability, RentalStatus } from "@prisma/client";
+import { MovieAvailability, RentalStatus, type Prisma } from "@prisma/client";
 import { env } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 
@@ -6,6 +6,19 @@ function buildExpirationDate() {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + env.rentalDurationDays)
     return expiresAt;
+}
+
+function calculateRentalPrice(
+  rentalPrice: Prisma.Decimal,
+  discountPercentage?: number | null
+) {
+  const discount = Math.min(100, Math.max(0, discountPercentage ?? 0));
+
+  if (discount === 0) {
+    return rentalPrice;
+  }
+
+  return rentalPrice.minus(rentalPrice.mul(discount).div(100));
 }
 
 export async function processCheckout(userId: string, movieIds: string[]) {
@@ -40,7 +53,7 @@ export async function processCheckout(userId: string, movieIds: string[]) {
         userId,
         movieId: movie.id,
         expiresAt: buildExpirationDate(),
-        pricePaid: movie.rentalPrice.mul(100 - movie.discountPercentage).div(100),
+        pricePaid: calculateRentalPrice(movie.rentalPrice, movie.discountPercentage),
         status: RentalStatus.ACTIVE
       }
     })));
@@ -98,7 +111,10 @@ export async function processRenewal(userId: string, rentalId: string) {
     data: {
       userId: previousRental.userId,
       movieId: previousRental.movieId,
-      pricePaid: previousRental.movie.rentalPrice,
+      pricePaid: calculateRentalPrice(
+        previousRental.movie.rentalPrice,
+        previousRental.movie.discountPercentage
+      ),
       expiresAt: buildExpirationDate(),
       renewedFromId: previousRental.id
     }

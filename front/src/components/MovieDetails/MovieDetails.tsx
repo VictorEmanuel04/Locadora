@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useCallback, type FormEvent } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ThemeProvider as MuiThemeProvider, 
   CssBaseline, 
@@ -10,14 +10,15 @@ import {
   Rating, 
   TextField,
   Alert,
-  Avatar
+  Avatar,
+  IconButton
 } from '@mui/material';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { ShoppingCart as ShoppingCartIcon, FavoriteBorder as FavoriteBorderIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
 import { muiTheme } from '../../styles/theme'; 
 import { api, getApiError } from '../../services/api';
 import { AuthContext } from '../../context/authContext';
+import { calculateDiscountedPrice, formatCurrency } from '../../utils/pricing';
 
 import { 
   PageContainer, 
@@ -35,9 +36,9 @@ import {
 interface Review {
   id: string;
   rating: number;
-  comment: string;
+  comment: string | null;
   createdAt: string;
-  user: { name: string };
+  user: { id: string; name: string; };
 }
 
 interface MovieDetailsData {
@@ -47,6 +48,7 @@ interface MovieDetailsData {
   genre: string;
   releaseYear: number;
   rentalPrice: string | number;
+  discountPercentage: number;
   posterUrl?: string;
   reviews: Review[];
 }
@@ -54,7 +56,7 @@ interface MovieDetailsData {
 export default function MovieDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, user } = useContext(AuthContext);
 
   const [movie, setMovie] = useState<MovieDetailsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -114,6 +116,19 @@ export default function MovieDetails() {
     }
   };
 
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!window.confirm("Tem certeza que deseja excluir esta avaliação?")) return;
+    
+    try {
+      // Chama a rota de admin que acabamos de criar
+      await api.delete(`/admin/reviews/${reviewId}`);
+      setMessage({ text: 'Avaliação excluída pelo Admin!', type: 'success' });
+      fetchMovie(); // Recarrega os dados do filme para a avaliação sumir da tela
+    } catch (error: unknown) {
+      setMessage({ text: getApiError(error, 'Erro ao excluir avaliação.'), type: 'error' });
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#0D0D12' }}>
@@ -128,6 +143,9 @@ export default function MovieDetails() {
   const avgRating = movie.reviews.length > 0 
     ? (movie.reviews.reduce((acc, curr) => acc + curr.rating, 0) / movie.reviews.length).toFixed(1)
     : 'Sem notas';
+  const discount = movie.discountPercentage ?? 0;
+  const hasDiscount = discount > 0;
+  const finalPrice = calculateDiscountedPrice(movie.rentalPrice, discount);
 
   return (
     <MuiThemeProvider theme={muiTheme}>
@@ -162,6 +180,32 @@ export default function MovieDetails() {
               </Alert>
             )}
 
+            <Box sx={{ mb: 2 }}>
+              {hasDiscount && (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ textDecoration: 'line-through' }}
+                >
+                  {formatCurrency(Number(movie.rentalPrice))}
+                </Typography>
+              )}
+              <Typography
+                variant="h5"
+                sx={{
+                  color: hasDiscount ? 'warning.main' : 'primary.main',
+                  fontWeight: 800
+                }}
+              >
+                {formatCurrency(finalPrice)}
+                {hasDiscount && (
+                  <Typography component="span" sx={{ ml: 1, color: 'warning.main', fontWeight: 700 }}>
+                    -{discount}%
+                  </Typography>
+                )}
+              </Typography>
+            </Box>
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
               <Button 
                 variant="contained" 
@@ -171,7 +215,7 @@ export default function MovieDetails() {
                 onClick={handleAddToCart}
                 sx={{ px: 4, py: 1.5, borderRadius: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}
               >
-                Alugar por R$ {Number(movie.rentalPrice).toFixed(2).replace('.', ',')}
+                Adicionar ao carrinho
               </Button>
               
               <Button 
@@ -233,16 +277,52 @@ export default function MovieDetails() {
             movie.reviews.map(review => (
               <ReviewCard key={review.id} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                  <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
-                    {review.user.name.charAt(0).toUpperCase()}
-                  </Avatar>
-                  <Box>
-                    <Typography variant="subtitle2" sx = {{fontWeight:"bold"}}>{review.user.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {new Date(review.createdAt).toLocaleDateString('pt-BR')}
-                    </Typography>
+                  <Box
+                    component={Link}
+                    to={`/perfil/${review.user.id}`}
+                    aria-label={`Ver perfil de ${review.user.name}`}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
+                      color: 'inherit',
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                      borderRadius: 2,
+                      '&:hover': { opacity: 0.8 },
+                      '&:focus-visible': {
+                        outline: '2px solid',
+                        outlineColor: 'primary.main',
+                        outlineOffset: 4
+                      }
+                    }}
+                  >
+                    <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
+                      {review.user.name.charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                        {review.user.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(review.createdAt).toLocaleDateString('pt-BR')}
+                      </Typography>
+                    </Box>
                   </Box>
+                  
+                  {/* A margin-left: auto empurra as estrelas (e o botão) para a direita */}
                   <Rating value={review.rating} readOnly size="small" sx={{ ml: 'auto', color: '#FFD700' }} />
+                  
+                  {/* SÓ APARECE PARA O ADMIN */}
+                  {user?.role === 'ADMIN' && (
+                    <IconButton 
+                      size="small" 
+                      color="error" 
+                      onClick={() => handleDeleteReview(review.id)}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
                 </Box>
                 {review.comment && (
                   <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>

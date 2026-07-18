@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { Paper, Typography, InputBase } from '@mui/material';
 
 // Paleta de cores do Cinerent

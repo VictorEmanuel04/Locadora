@@ -43,7 +43,7 @@ export default function Auth() {
     setFormData({ name: '', email: '', password: '' });
   };
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);

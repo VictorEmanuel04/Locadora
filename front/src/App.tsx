@@ -11,6 +11,7 @@ import MovieDetails from './components/MovieDetails/MovieDetails';
 import Cart from './components/Cart/Cart';
 import Profile from './components/Profile/Profile';
 import Admin from './components/Admin/Admin'; // Adicionando a rota do Admin que vi que você tem!
+import UserProfile from './components/PublicProfile/UserProfile';
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useContext(AuthContext);
@@ -37,6 +38,7 @@ function App() {
           <Route path="/filme/:id" element={<MovieDetails />} />
           <Route path="/carrinho" element={<RequireAuth><Cart /></RequireAuth>} />
           <Route path="/perfil" element={<RequireAuth><Profile /></RequireAuth>} />
+          <Route path="/perfil/:userId" element={<UserProfile />} />
           
           {/* Rota para o seu painel de administrador */}
           <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />

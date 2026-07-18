@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { Typography, Paper, Chip } from '@mui/material';
 import { themeConfig } from '../../styles/theme';
 

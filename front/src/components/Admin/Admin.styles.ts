@@ -1,14 +1,8 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { createTheme, Paper, Typography } from '@mui/material';
 
 // --- TEMAS GLOBAIS ---
-export const themeConfig = {
-  background: '#0D0D12',
-  surface: '#1A1A24',
-  primary: '#635BFF', 
-  textPrimary: '#FFFFFF',
-  textSecondary: '#A0A0B0',
-};
+import { themeConfig } from '../../styles/theme';
 
 export const muiTheme = createTheme({
   palette: {
@@ -46,9 +40,10 @@ export const muiTheme = createTheme({
 // --- COMPONENTES VISUAIS (STYLED COMPONENTS) ---
 export const AdminContainer = styled.div`
   padding: 40px 20px;
-  max-width: 1200px;
+  max-width: 90%px;
   margin: 0 auto;
   min-height: 100vh;
+  background: linear-gradient(to bottom, #1E293B 0%, #0F172A 100%);
 `;
 
 export const HeaderTitle = styled(Typography)`
@@ -56,6 +51,7 @@ export const HeaderTitle = styled(Typography)`
     font-weight: 800;
     margin-bottom: 32px;
     letter-spacing: -0.5px;
+    color: ${themeConfig.primary}
   }
 `;
 
@@ -64,7 +60,7 @@ export const StyledPaper = styled(Paper)`
     padding: 24px;
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    background: ${themeConfig.surface};
+    background: ${themeConfig.background};
   }
 `;
 
@@ -73,6 +69,7 @@ export const MovieListContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  color: ${themeConfig.primary  }
 `;
 
 export const MovieItem = styled(Paper)`
@@ -82,7 +79,7 @@ export const MovieItem = styled(Paper)`
     justify-content: space-between;
     align-items: center;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.03);
+    background: ${themeConfig.background};
     transition: background 0.2s ease;
 
     &:hover {

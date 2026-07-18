@@ -95,3 +95,18 @@ export async function deleteMovie(request: Request, response: Response) {
 
   return response.status(204).send();
 }
+
+export async function deleteReview(request: Request, response: Response) {
+  const reviewId = String(request.params.id);
+
+  try {
+    // Substitua "review" pelo nome exato do seu model no Prisma (pode ser "rating", "comment", etc)
+    await prisma.review.delete({
+      where: { id: reviewId }
+    });
+
+    return response.status(204).send();
+  } catch (error) {
+    return response.status(400).json({ error: "Erro ao excluir avaliação." });
+  }
+}

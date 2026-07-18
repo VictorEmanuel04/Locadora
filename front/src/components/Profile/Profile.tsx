@@ -11,9 +11,7 @@ import {
   Avatar,
   Button
 } from '@mui/material';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircle';
-import ReplayIcon from '@mui/icons-material/Replay';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { PlayCircle as PlayCircleOutlineIcon, Replay as ReplayIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
 import { muiTheme } from '../../styles/theme'; 
 import { api } from '../../services/api';

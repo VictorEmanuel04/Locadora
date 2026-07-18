@@ -8,8 +8,7 @@ import {
   IconButton, 
   Grid 
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 
 // Importando os estilos e o tema do arquivo .styles
 import { 
@@ -34,6 +33,7 @@ interface Movie {
   rentalPrice: string | number;
   stock: number;
   discountPercentage: number;
+  posterUrl?: string | null;
 }
 
 type MovieForm = Omit<Movie, 'id'>;
@@ -64,7 +64,7 @@ export default function AdminMovies() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Converte ano e nota para Number para evitar erros de tipagem no Prisma (backend)
@@ -117,6 +117,7 @@ export default function AdminMovies() {
       rentalPrice: movie.rentalPrice,
       stock: movie.stock,
       discountPercentage: movie.discountPercentage,
+      posterUrl: movie.posterUrl,
     });
   };
 
@@ -177,6 +178,17 @@ export default function AdminMovies() {
                   rows={3}
                   value={formData.synopsis || ''}
                   onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="URL do Pôster/Capa (Link da imagem)"
+                  name="posterUrl"
+                  value={formData.posterUrl || ''}
+                  onChange={handleInputChange}
+                  variant="outlined"
+                  placeholder="https://exemplo.com/imagem.jpg"
                 />
               </Grid>
               <Grid item xs={12} sm={4}>

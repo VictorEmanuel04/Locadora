@@ -8,7 +8,7 @@ export const NavContainer = styled.nav`
   left: 0;
   right: 0;
   height: 80px;
-  background-color: rgba(13, 13, 18, 0.9); /* Fundo semi-transparente */
+  background-color: #1e293b;; /* Fundo semi-transparente */
   backdrop-filter: blur(10px); /* Efeito de vidro (glassmorphism) */
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   z-index: 1000;
@@ -55,7 +55,7 @@ export const NavLink = styled(Typography)<{ active?: boolean }>`
   && {
     font-weight: 600;
     font-size: 1rem;
-    color: ${props => props.active ? themeConfig.textPrimary : themeConfig.textSecondary};
+    color: ${props => props.active ? themeConfig.primary : themeConfig.textSecondary};
     cursor: pointer;
     transition: color 0.2s ease;
 

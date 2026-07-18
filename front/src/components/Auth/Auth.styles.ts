@@ -1,15 +1,6 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { Paper, Typography } from '@mui/material';
-
-// Importando a paleta que já definimos no arquivo anterior
-// Caso esteja em um arquivo global, basta importar de lá.
-export const themeConfig = {
-  background: '#0D0D12',
-  surface: '#1A1A24',
-  primary: '#635BFF', 
-  textPrimary: '#FFFFFF',
-  textSecondary: '#A0A0B0',
-};
+import { themeConfig } from '../../styles/theme';
 
 export const AuthContainer = styled.div`
   display: flex;
@@ -17,7 +8,7 @@ export const AuthContainer = styled.div`
   align-items: center;
   min-height: 100vh;
   padding: 20px;
-  background: ${themeConfig.background};
+  background: linear-gradient(to bottom, #1E293B 0%, #0F172A 100%);
 `;
 
 export const AuthCard = styled(Paper)`
@@ -26,7 +17,7 @@ export const AuthCard = styled(Paper)`
     border-radius: 16px;
     width: 100%;
     max-width: 440px;
-    background: ${themeConfig.surface};
+    background: ${themeConfig.background};
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
     display: flex;
