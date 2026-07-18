@@ -1,7 +1,6 @@
 # Cinerent — Versão Final
 
 **Discente:** Víctor Emanuel Mourão de Castro — 22.2.8006  
-**Disciplina:** CSI606 — Desenvolvimento Web  
 **Tipo de projeto:** Aplicação web full-stack para locação digital de filmes
 
 ## Resumo
