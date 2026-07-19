@@ -358,8 +358,6 @@ Email: admin@cinerent.com
 Senha: admin123
 ```
 
-Essa senha deve ser alterada antes de qualquer disponibilização pública.
-
 Inicie a API:
 
 ```bash
@@ -392,12 +390,6 @@ Por padrão, o frontend utiliza:
 
 ```text
 http://localhost:3333/api
-```
-
-Para utilizar outra API, crie `front/.env`:
-
-```env
-VITE_API_URL="http://localhost:3333/api"
 ```
 
 A aplicação ficará disponível em:
@@ -440,7 +432,6 @@ npm run build
 npm run preview
 ```
 
-Para ambientes reais, também é necessário configurar corretamente CORS, HTTPS, segredos, banco de dados e a hospedagem dos arquivos estáticos do frontend.
 
 ## 7. Referências
 
