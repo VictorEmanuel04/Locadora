@@ -134,18 +134,73 @@ export default function MovieCatalog() {
             </SearchContainer>
 
             {/* Novo seletor de Gênero */}
-            <FormControl size="small" sx={{ minWidth: 150 }}>
+            <FormControl
+              size="small"
+              sx={{
+                minWidth: 180,
+                '@media (max-width: 600px)': {
+                  width: '100%',
+                  minWidth: 0,
+                },
+              }}
+            >
               <Select
                 value={genre}
                 onChange={handleGenreChange}
                 displayEmpty
-                sx={{ 
-                  color: 'white', 
-                  backgroundColor: 'rgba(255,255,255,0.05)',
+                inputProps={{ 'aria-label': 'Filtrar filmes por gênero' }}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      mt: 1,
+                      maxHeight: 320,
+                      color: themeConfig.textPrimary,
+                      backgroundColor: '#0D2D3D',
+                      backgroundImage: 'none',
+                      border: `1px solid ${themeConfig.primary}`,
+                      borderRadius: 2,
+                      boxShadow: '0 16px 36px rgba(0, 0, 0, 0.55)',
+                    },
+                  },
+                  MenuListProps: {
+                    sx: {
+                      py: 0.5,
+                      '& .MuiMenuItem-root': {
+                        minHeight: 42,
+                        mx: 0.5,
+                        px: 1.5,
+                        borderRadius: 1,
+                        color: themeConfig.textPrimary,
+                      },
+                      '& .MuiMenuItem-root:hover': {
+                        backgroundColor: 'rgba(230, 161, 92, 0.14)',
+                      },
+                      '& .MuiMenuItem-root.Mui-selected': {
+                        color: '#17120D',
+                        fontWeight: 700,
+                        backgroundColor: themeConfig.primary,
+                      },
+                      '& .MuiMenuItem-root.Mui-selected:hover': {
+                        backgroundColor: '#F0AD68',
+                      },
+                    },
+                  },
+                }}
+                sx={{
+                  color: themeConfig.textPrimary,
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   borderRadius: '8px',
-                  '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.1)' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: themeConfig.primary },
-                  '.MuiSvgIcon-root': { color: 'white' }
+                  '.MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(255, 255, 255, 0.22)',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: themeConfig.primary,
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: themeConfig.primary,
+                    borderWidth: 2,
+                  },
+                  '.MuiSvgIcon-root': { color: themeConfig.primary },
                 }}
               >
                 {GENRES.map((g) => (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   ThemeProvider as MuiThemeProvider, 
   CssBaseline, 
@@ -6,7 +6,8 @@ import {
   Button, 
   Typography, 
   IconButton, 
-  Grid 
+  Grid,
+  Pagination
 } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 
@@ -39,21 +40,28 @@ export default function AdminMovies() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [formData, setFormData] = useState<Partial<MovieForm>>({ stock: 1, discountPercentage: 0 });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const fetchMovies = async () => {
+  const fetchMovies = useCallback(async (currentPage: number) => {
     try {
-      const response = await api.get('/movies');
+      const response = await api.get('/movies', {
+        params: { page: currentPage, limit: 10 }
+      });
       setMovies(response.data.data);
+      setTotalPages(Math.max(response.data.meta?.totalPages ?? 1, 1));
+      setTotalItems(response.data.meta?.totalItems ?? response.data.data.length);
     } catch (error: unknown) {
       console.error("Erro ao carregar filmes:", getApiError(error, "Erro ao carregar filmes."));
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Busca assíncrona de um recurso externo após a montagem.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    void fetchMovies();
-  }, []);
+    void fetchMovies(page);
+  }, [fetchMovies, page]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -79,7 +87,7 @@ export default function AdminMovies() {
       
       setFormData({});
       setEditingId(null);
-      fetchMovies();
+      await fetchMovies(page);
     } catch (error: unknown) {
       alert(getApiError(error, "Erro ao salvar o filme."));
     }
@@ -92,7 +100,11 @@ export default function AdminMovies() {
     try {
       // Rota de DELETE
       await api.delete(`/admin/movies/${id}`);
-      fetchMovies(); // Recarrega a lista
+      if (movies.length === 1 && page > 1) {
+        setPage((currentPage) => currentPage - 1);
+      } else {
+        await fetchMovies(page);
+      }
     } catch (error: unknown) {
       alert(getApiError(error, "Erro ao excluir o filme."));
     }
@@ -216,7 +228,7 @@ export default function AdminMovies() {
 
         <MovieListContainer>
           <Typography variant="h5" color="textPrimary" sx={{ mt: 2, mb: 1, fontWeight: 'bold' }}>
-            Catálogo Existente
+            Catálogo Existente ({totalItems})
           </Typography>
           
           {movies.length === 0 ? (
@@ -238,6 +250,21 @@ export default function AdminMovies() {
                 </div>
               </MovieItem>
             ))
+          )}
+
+          {totalPages > 1 && (
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(_event, nextPage) => setPage(nextPage)}
+              color="primary"
+              size="large"
+              sx={{
+                alignSelf: 'center',
+                mt: 2,
+                '& .MuiPaginationItem-root': { color: 'text.primary' }
+              }}
+            />
           )}
         </MovieListContainer>
 

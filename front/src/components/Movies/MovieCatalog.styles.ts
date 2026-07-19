@@ -17,6 +17,10 @@ export const TopBar = styled.div`
   margin-bottom: 40px;
   flex-wrap: wrap;
   gap: 20px;
+
+  @media (max-width: 600px) {
+    align-items: stretch;
+  }
 `;
 
 export const SectionTitle = styled(Typography)`
@@ -32,6 +36,13 @@ export const FilterContainer = styled.div`
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+
+  @media (max-width: 600px) {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
 `;
 
 export const SearchContainer = styled.div`
@@ -40,13 +51,20 @@ export const SearchContainer = styled.div`
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 50px;
   padding: 4px 16px;
-  width: 100%;
+  width: 280px;
   min-width: 250px;
+  max-width: 100%;
+  box-sizing: border-box;
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: border-color 0.3s;
 
   &:focus-within {
     border-color: ${themeConfig.primary};
+  }
+
+  @media (max-width: 600px) {
+    width: 100%;
+    min-width: 0;
   }
 `;
 

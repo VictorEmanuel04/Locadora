@@ -38,7 +38,8 @@ export const muiTheme = createTheme({
 
 export const AdminContainer = styled.div`
   padding: 40px 20px;
-  max-width: 90%px;
+  width: 90%;
+  max-width: 1400px;
   margin: 0 auto;
   min-height: 100vh;
   background: linear-gradient(to bottom, #1E293B 0%, #0F172A 100%);
